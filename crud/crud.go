@@ -101,10 +101,13 @@ func updatePersonEndPoint(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	// Pedgando dados do body da requisão que serão usados para atualizar o DB
 	err = json.Unmarshal(body, &person)
 	if err != nil {
 		fmt.Println("[crud] Erro ao converter o retorno json do servidor. Erro: ", err.Error())
 	}
+
+	// Passando os dados do body para poder ser tratado pelo GO e mandando para o mongo
 	update := bson.M{
 		"$set": bson.M{
 			"firstname": person.Firstname,
