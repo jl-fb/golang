@@ -22,9 +22,12 @@ func conncection() {
 	//ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	//err = client.Connect(ctx)
 	// Maneira mains economica em código
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, err := context.WithTimeout(context.Background(), 10*time.Second)
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 	client, _ = mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		fmt.Println("[connection] Não foi possível acessar o banco de dados. ERRO: ", err)
+	}
 }
 
 func applicationJSON(h http.HandlerFunc) http.HandlerFunc {
