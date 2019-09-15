@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -104,26 +103,38 @@ func updatePersonEndPoint(w http.ResponseWriter, r *http.Request) {
 	ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
 	filter := bson.M{"_id": id}
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println("[crud] Erro ao ler conteudo do servidor. Erro: ", err.Error())
-	}
-	defer r.Body.Close()
-
 	// Pedgando dados do body da requisão que serão usados para atualizar o DB
-	err = json.Unmarshal(body, &person)
+	err := json.NewDecoder(r.Body).Decode(&person)
 	if err != nil {
 		fmt.Println("[crud] Erro ao converter o retorno json do servidor. Erro: ", err.Error())
 	}
-
-	// Passando os dados do body para poder ser tratado pelo GO e mandando para o mongo
-	update := bson.M{
+	updatable := bson.M{
 		"$set": bson.M{
 			"firstname": person.Firstname,
 			"lastname":  person.Lastname,
 		},
 	}
-	result, err := collection.UpdateOne(ctx, filter, update)
+
+	// body, err := ioutil.ReadAll(r.Body)
+	// if err != nil {
+	// 	fmt.Println("[crud] Erro ao ler conteudo do servidor. Erro: ", err.Error())
+	// }
+	// defer r.Body.Close()
+
+	// Pedgando dados do body da requisão que serão usados para atualizar o DB
+	// err = json.Unmarshal(body, &person)
+	// if err != nil {
+	// 	fmt.Println("[crud] Erro ao converter o retorno json do servidor. Erro: ", err.Error())
+	// }
+
+	// Passando os dados do body para poder ser tratado pelo GO e mandando para o mongo
+	// update := bson.M{
+	// 	"$set": bson.M{
+	// 		"firstname": person.Firstname,
+	// 		"lastname":  person.Lastname,
+	// 	},
+	// }
+	result, err := collection.UpdateOne(ctx, filter, updatable)
 	if err != nil {
 		fmt.Printf("Erro ao atualizar usuário: %v", err)
 	}
