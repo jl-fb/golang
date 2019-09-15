@@ -62,7 +62,16 @@ func getPersonEndpoint(resp http.ResponseWriter, req *http.Request) {
 	// id, _ := primitive.ObjectIDFromHex(params["id"])
 	id := getID(req)
 	collection := client.Database("testMongo").Collection("pessoas")
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	select {
+	case <-time.After(6 * time.Second):
+		fmt.Println("overslept")
+	case <-ctx.Done():
+		fmt.Println(ctx.Err())
+	}
+
 	err := collection.FindOne(ctx, model.Person{ID: id}).Decode(&person)
 	if err != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
